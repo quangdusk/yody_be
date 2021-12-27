@@ -2,31 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
+use App\Jobs\RegisterAccount;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(UserRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:191',
-            'email' => 'required|email:rfc,dns|max:191|unique:users,email',
-            'password' => 'required|string',
-        ]);
-
+        $userCheck = User::where('email', $request['email'])->orWhere('phone', $request['email'])->orWhere('username', $request['email'])->first();
+        if ($userCheck) {
+            return response(['message' => 'Tài khoản đã được sử dụng'], 400);
+        }
         $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password'])
+            'code' => $request['code'] ? $request['code'] : null,
+            'type' => $request['type'] ? $request['type'] : null,
+            'name' => $request['name'] ? $request['name'] : null,
+            'phone' => $request['phone'] ? $request['phone'] : null,
+            'email' => $request['email'] ? $request['email'] : null,
+            'address' => $request['address'] ? $request['address'] : null,
+            'username' => $request['username'] ? $request['username'] : null,
+            'password' => $request['password'] ? Hash::make($request['password']) : null,
+            'cityId' => $request['cityId'] ? $request['cityId'] : null,
+            'status' => 1,
+            'cmnd' => $request['cmnd'] ? $request['cmnd'] : null,
+            'birthday' => $request['birthday'] ? $request['birthday'] : null,
+            'images' => $request['images'] ? $request['images'] : null,
         ]);
 
         $token = $user->createToken('authToken')->plainTextToken;
-        
+
+        \Amqp::publish('send-mail-register-account', $user->toArray()['email'], ['queue' => 'send-mail-register-account', 'exchange' => 'exchange_' . config('config.merchant_name')]);
+
         $response = [
             'user' => $user,
-            'token' => $token 
+            'token' => $token
         ];
 
         return response($response, 201);
@@ -41,17 +53,15 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $data = $request->validate([
-            'email' => 'required|email|max:191',
-            'password' => 'required|string',
+            'email' => 'string',
+            'password' => 'required|string'
         ]);
 
-        $user = User::where('email', $data['email'])->first();
+        $user = User::where('email', $data['email'])->orWhere('phone', $data['email'])->orWhere('username', $data['email'])->first();
 
-        if(!$user || !Hash::check($data['password'], $user->password))
-        {
+        if (!$user || !Hash::check($data['password'], $user->password)) {
             return response(['message' => 'Invalid Credentials'], 401);
-        } 
-        else {
+        } else {
             $token = $user->createToken('authToken')->plainTextToken;
             $response = [
                 'user' => $user,

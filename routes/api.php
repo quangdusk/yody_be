@@ -22,6 +22,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
 });
 
+Route::get('send-mail', function () {
+   
+    $details = [
+        'title' => 'Bạn hãy chọn vào link bên dưới để xác nhận',
+        'body' => 'This is for testing email using smtp'
+    ];
+   
+    \Mail::to('quangnd.hn@havaz.vn')->send(new \App\Mail\MailConfirmRegister($details));
+   
+    dd("Email is Sent.");
+});
+
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
