@@ -15,10 +15,10 @@ class CreateUserRolesTable extends Migration
     {
         Schema::create('user_roles', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('userId')->comment('Mã khách hàng');
-            $table->string('deviceName')->comment("Tên thiết bị");
-            $table->string('deviceToken')->comment("Token thiết bị");
-            $table->string('model')->comment("Nền tảng đăng nhập");
+            $table->integer('userId')->nullable()->comment('Mã khách hàng');
+            $table->string('roleId')->nullable()->comment("Mã chức danh");
+            $table->string('createdBy')->nullable()->comment("Người tạo");
+            $table->string('isDeleted')->nullable()->comment("Đã xóa");
             $table->timestamps();
         });
     }

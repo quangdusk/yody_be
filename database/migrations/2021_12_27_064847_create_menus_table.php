@@ -22,6 +22,9 @@ class CreateMenusTable extends Migration
             $table->integer('parentId')->nullable()->comment("Id menu cha");
             $table->integer('status')->nullable()->comment("Trạng thái khuyến mãi của menu");
             $table->timestamps();
+
+            $table->index('name');
+            $table->index('status');
         });
     }
 
