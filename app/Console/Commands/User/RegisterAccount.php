@@ -80,9 +80,9 @@ class RegisterAccount extends Command
             //finish
         });
 
-        // while (count($channel->callbacks)) {
-        //     $channel->wait();
-        // }
+        while (count($channel->callbacks)) {
+            $channel->wait();
+        }
         $channel->close();
         $connection->close();
         $this->info('Queue worker stopped');
