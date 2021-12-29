@@ -46,7 +46,19 @@ class RegisterAccount extends Command
 
         $amqpConfig = config('amqp.properties.production');
 
-        $connection = new AMQPStreamConnection($amqpConfig['host'], $amqpConfig['port'], $amqpConfig['username'], $amqpConfig['password'], $amqpConfig['vhost']);
+        $connection = new AMQPStreamConnection(
+            $amqpConfig['host'],
+            $amqpConfig['port'],
+            $amqpConfig['username'],
+            $amqpConfig['password'],
+            $amqpConfig['vhost'],
+            false,
+            'AMQPLAIN',
+            null,
+            'en_US',
+            30000,
+            30000
+        );
 
         $channel = $connection->channel();
         $exchange = 'exchange_yody';
@@ -59,7 +71,7 @@ class RegisterAccount extends Command
 
         $channel->queue_bind($queue, $exchange, $routingKey);
 
-        $channel->basic_consume($queue, '', false, false, false, false, function ($msg) use($exchange, $channel) {
+        $channel->basic_consume($queue, '', false, false, false, false, function ($msg) use ($exchange, $channel) {
 
             $this->info("started event_trip_elasticsearch");
             $strMessage = $msg->body;

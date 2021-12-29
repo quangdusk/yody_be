@@ -7,6 +7,7 @@ use App\Jobs\RegisterAccount;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class AuthController extends Controller
 {
